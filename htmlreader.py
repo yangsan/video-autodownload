@@ -19,21 +19,32 @@ if __name__ == "__main__":
     #url = "http://c.learncodethehardway.org/book/"
     #ur l = "http://www.ttmeiju.com/"
     #url = "http://www.ttmeiju.com/meiju/Late.Night.with.Seth.Meyers.html"
-    url = "http://eztv.it/shows/991/seth-meyers-late-night-with/"
+    #url = "http://eztv.it/shows/991/seth-meyers-late-night-with/"
 
-    req = urllib2.Request(url, headers={'User-Agent': "Magic Browser"})
+    #req = urllib2.Request(url, headers={'User-Agent': "Magic Browser"})
 
-    resp = urllib2.urlopen(req)
+    #resp = urllib2.urlopen(req)
 
-    code = sys.getfilesystemencoding()
+    #code = sys.getfilesystemencoding()
 
-    respHTML = resp.read().decode(encoding="gbk").encode(code)
+    #respHTML = resp.read().decode(encoding="gbk").encode(code)
 
-    soup = BeautifulSoup(respHTML)
+    #soup = BeautifulSoup(respHTML)
 
-    for item in soup.find_all("a", class_='magnet'):
-        print item
+    #showList = set()
+    #for item in soup.find_all("a", class_='magnet'):
+        ##print item.attrs
+        #showList.add(item.attrs['href'])
 
+
+    test = set()
+    for i in range(10):
+        test.add(i)
+    test.add(1)
+    test.add(10)
+    test.add(1)
+
+    print test
 
 
     #with open('sethmeyers.html','w') as f:
