@@ -81,7 +81,7 @@ def deleteShow():
         print "*************************************************************************"
         print "-------------------------------------------------------------------------"
         number = int(raw_input(
-            "Enter the number before theone you want to delete , enter other keys to abort\n==>:"))
+            "Enter the number before the one you want to delete , enter other keys to abort\n==>:"))
         try:
             showname = show_name_list[number]
             call(["rm", show_list[showname]["filename"]])
@@ -144,11 +144,64 @@ def initEpList(show_info):
     saveEpList(show_info["filename"], ep_list)
 
 
+def saveEpList(filename, ep_list):
+    with open(filename, "w+") as f:
+        json.dump(ep_list, f)
+
+
+def openEpList(filename):
+    try:
+        with open(filename) as f:
+            return json.load(f)
+    except:
+        print "Episodes list dosen't exit or is empty."
+        return None
+
+
+def showEpList():
+    show_list = openShowList()
+    if show_list:
+        show_name_list = show_list.keys()
+        print "-------------------------------------------------------------------------"
+        print "*************************************************************************"
+        print "Show list:"
+        for i, showname in enumerate(show_name_list):
+            print "%d. %s" % (i, showname)
+        print "*************************************************************************"
+        print "-------------------------------------------------------------------------"
+        number = int(raw_input(
+            "Enter the number before the show you want for episodes list, enter other keys to abort\n==>:"))
+        try:
+            showname = show_name_list[number]
+            show_info = show_list[showname]
+            filename = show_info["filename"]
+            ep_list = openEpList(filename)
+            if ep_list:
+                print "-------------------------------------------------------------------------"
+                print "*************************************************************************"
+                print "Episodes list:"
+                for i, showname in enumerate(sorted(ep_list.keys(), reverse=True)):
+                    if i>10:
+                        break
+                    if ep_list[showname]:
+                        print "%d. Status: done     Show name: %s" % (i, showname)
+                    else:
+                        print "%d. Status: not yet  Show name: %s" % (i, showname)
+                print "*************************************************************************"
+                print "-------------------------------------------------------------------------"
+
+        except StandardError, e:
+            print "Error:" , e
+            print "Invalid input, abort."
+
 #################################################################
 
 
-#methods for ep downloading
+
+#parser and downloader
 #################################################################
+
+
 def htmlReader(url):
     """
     Taking in a url return a BeautifulSoup soup object.
@@ -164,12 +217,6 @@ def htmlReader(url):
     print "Done reading contents."
 
     return BeautifulSoup(respHTML)
-
-
-def saveEpList(filename, ep_list):
-    with open(filename, "w+") as f:
-        json.dump(ep_list, f)
-
 
 def freshAndDownload():
     show_list = openShowList()
@@ -198,30 +245,10 @@ def freshAndDownload():
             except:
                 print "%s dosen't exit or is empty." % (filename)
 
+#################################################################
 
-def epDownloader(soup, filename):
 
-    #try to open local json eplist
-    try:
-        with open(filename) as f:
-            eplist = json.load(f)
-    except:
-        print "%s dosen't exit or is empty." % (filename)
-        eplist = dict()
-
-    for item in soup.find_all("tr", class_='forum_header_border'):
-        epinfo = item.find_all("a", class_="epinfo")
-        if len(epinfo) > 0:
-            showname = epinfo[0]["title"]
-            if (showname not in eplist) or (not eplist[showname]):
-                print "Try to download ep: %s" % (showname)
-                magnet = item.find_all("a", class_="magnet")[0]["href"]
-                call(["transmission-gtk", magnet])
-                eplist[showname] = True
-
-    with open(filename, "w+") as f:
-        json.dump(eplist, f)
-
+#args handler
 #################################################################
 
 
@@ -229,23 +256,25 @@ def switch(flag):
     return {"1": addNewShow,
             "2": showShowList,
             "3": deleteShow,
-            "4": freshAndDownload}[flag]
+            "4": freshAndDownload,
+            "5": showEpList}[flag]
+
+#################################################################
 
 
 if __name__ == "__main__":
 
-    #freshAndDownload()
     while True:
         print "What do you want?"
         print "1.add new show"
         print "2.show show list"
         print "3.delete show"
         print "4.fresh and download"
+        print "5.show episodes list"
         print "Others to abort"
         flag = raw_input("==>")
         try:
             switch(flag)()
-        except:
+        except StandardError, e:
             print "Abort."
             break
-    #addNewShow()
