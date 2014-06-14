@@ -21,15 +21,7 @@ def htmlReader(url):
 
     return BeautifulSoup(respHTML)
 
-if __name__ == "__main__":
-
-    #url = "http://eztv.it/shows/991/seth-meyers-late-night-with/"
-    #url = "http://eztv.it/shows/983/the-tonight-show-starring-jimmy-fallon/"
-    url = "http://eztv.it/shows/632/derek/"
-
-    soup = htmlReader(url)
-
-    filename = "./json/derek.json"
+def epDownloader(soup, filename):
 
     #try to open local json eplist
     try:
@@ -51,3 +43,17 @@ if __name__ == "__main__":
 
     with open(filename, "w+") as f:
         json.dump(eplist, f)
+
+
+if __name__ == "__main__":
+
+    #url = "http://eztv.it/shows/991/seth-meyers-late-night-with/"
+    #url = "http://eztv.it/shows/983/the-tonight-show-starring-jimmy-fallon/"
+    url = "http://eztv.it/shows/632/derek/"
+
+    soup = htmlReader(url)
+
+    filename = "./json/derek.json"
+
+    epDownloader(soup, filename)
+
