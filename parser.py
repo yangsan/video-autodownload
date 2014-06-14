@@ -2,6 +2,7 @@
 from bs4 import BeautifulSoup
 import urllib2
 from subprocess import call
+import json
 
 
 if __name__ == "__main__":
@@ -22,22 +23,29 @@ if __name__ == "__main__":
 
     soup = BeautifulSoup(respHTML)
 
-    eplist = dict()
+    filename = "./json/derek.json"
 
-    #soup = BeautifulSoup(open("seth.html"))
+    #try to open local json eplist
+    try:
+        with open(filename) as f:
+            eplist = json.load(f)
+    except IOError:
+        print "%s dosen't exit." % (filename)
+        eplist = dict()
+
 
     for item in soup.find_all("tr", class_='forum_header_border'):
         epinfo = item.find_all("a", class_="epinfo")
         if len(epinfo) > 0:
-            magnet = item.find_all("a", class_="magnet")[0]["href"]
+            showname = epinfo[0]["title"]
+            if (showname not in eplist) or (not eplist[showname]):
+                magnet = item.find_all("a", class_="magnet")[0]["href"]
+                call(["transmission-gtk", magnet])
+                eplist[showname] = True
 
-            call(["transmission-gtk", magnet])
 
-            eplist[epinfo[0]["title"]] = True
-        ##for post in item.contents:
-        #for post in item.children:
-            ##print post
-            #print type(post)
-    for item in sorted(eplist.keys()):
-        print item
+    with open(filename, "w+") as f:
+        json.dump(eplist, f)
+    #for item in sorted(eplist.keys()):
+        #print item
     #print type(eplist.keys())
