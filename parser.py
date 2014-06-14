@@ -6,10 +6,11 @@ import json
 
 show_list_path = "./data/show_list.json"
 
-
+#################################################################
 def addNewShow():
     show_list = openShowList()
     if not show_list:
+        print "Build a new one."
         show_list = dict()
 
     show_name = raw_input("Enter show name:")
@@ -17,9 +18,10 @@ def addNewShow():
     show_file_name = show_name.replace(" ", "_")
 
     show_list[show_name] = {"url": url, "filename": show_file_name}
-    with open(show_list_path, "w+") as f:
-        json.dump(show_list, f)
-    print "Show: %s added." % (show_name)
+
+    saveShowList(show_list)
+
+    print "Show \" %s \"added." % (show_name)
 
 
 def openShowList():
@@ -28,22 +30,45 @@ def openShowList():
             show_list = json.load(f)
         return show_list
     except:
+        print "Show list dosen't exit or is empty."
         return None
 
-def showShowList():
-    show_list = openShowList()
+def saveShowList(show_list):
+    try:
+        with open(show_list_path, "w+") as f:
+            json.dump(show_list, f)
+    except IOError:
+        print "Can't open show list file."
+
+
+def showShowList(show_list):
     if show_list:
         print "Show list:"
         for showname in show_list.keys():
             print showname
     else:
-        print "Show list dosen't exit or is empty."
+        print "Show list is empty."
 
 
+def deleteShow():
+    show_list = openShowList()
+    if show_list:
+        show_name_list = [name for name in show_list.keys()]
+        print "Show List:"
+        for i, name in enumerate(show_name_list):
+            print "%d. %s" %(i, name)
+        number = int(raw_input(
+            "Enter the number before theone you want to delete , enter other keys to abort\n ==>:"))
+        try:
+            show_list.pop(show_name_list[number])
+            saveShowList(show_list)
+            print "\" %s \" deleted" % (show_name_list[number])
+            print "--------------------------------------------"
+        except:
+            print "Invalid input, abort."
 
-def deleteShow(self):
-    pass
 
+#################################################################
 
 
 def htmlReader(url):
@@ -98,6 +123,5 @@ if __name__ == "__main__":
     #filename = "./json/derek.json"
 
     #epDownloader(soup, filename)
-    showShowList()
-    addNewShow()
+    deleteShow()
 
