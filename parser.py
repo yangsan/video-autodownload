@@ -4,6 +4,47 @@ import urllib2
 from subprocess import call
 import json
 
+show_list_path = "./data/show_list.json"
+
+
+def addNewShow():
+    show_list = openShowList()
+    if not show_list:
+        show_list = dict()
+
+    show_name = raw_input("Enter show name:")
+    url = raw_input("Enter show url:")
+    show_file_name = show_name.replace(" ", "_")
+
+    show_list[show_name] = {"url": url, "filename": show_file_name}
+    with open(show_list_path, "w+") as f:
+        json.dump(show_list, f)
+    print "Show: %s added." % (show_name)
+
+
+def openShowList():
+    try:
+        with open(show_list_path) as f:
+            show_list = json.load(f)
+        return show_list
+    except:
+        return None
+
+def showShowList():
+    show_list = openShowList()
+    if show_list:
+        print "Show list:"
+        for showname in show_list.keys():
+            print showname
+    else:
+        print "Show list dosen't exit or is empty."
+
+
+
+def deleteShow(self):
+    pass
+
+
 
 def htmlReader(url):
     """
@@ -20,6 +61,7 @@ def htmlReader(url):
     print "Done reading contents."
 
     return BeautifulSoup(respHTML)
+
 
 def epDownloader(soup, filename):
 
@@ -47,13 +89,15 @@ def epDownloader(soup, filename):
 
 if __name__ == "__main__":
 
-    #url = "http://eztv.it/shows/991/seth-meyers-late-night-with/"
-    #url = "http://eztv.it/shows/983/the-tonight-show-starring-jimmy-fallon/"
-    url = "http://eztv.it/shows/632/derek/"
+    ##url = "http://eztv.it/shows/991/seth-meyers-late-night-with/"
+    ##url = "http://eztv.it/shows/983/the-tonight-show-starring-jimmy-fallon/"
+    #url = "http://eztv.it/shows/632/derek/"
 
-    soup = htmlReader(url)
+    #soup = htmlReader(url)
 
-    filename = "./json/derek.json"
+    #filename = "./json/derek.json"
 
-    epDownloader(soup, filename)
+    #epDownloader(soup, filename)
+    showShowList()
+    addNewShow()
 
