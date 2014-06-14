@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import urllib2
 from subprocess import call
 import json
+import os
 
 show_list_path = "./data/show_list.json"
 
@@ -10,6 +11,9 @@ show_list_path = "./data/show_list.json"
 #################################################################
 
 def addNewShow():
+    if not os.path.exists("./data"):
+        call(["mkdir","data"])
+
     show_list = openShowList()
     if not show_list:
         print "Build a new one."
@@ -26,7 +30,7 @@ def addNewShow():
 
     saveShowList(show_list)
 
-    print "Show \" %s \"added." % (show_name)
+    print "Show \"%s\"added." % (show_name)
 
 
 def openShowList():
@@ -48,9 +52,13 @@ def saveShowList(show_list):
 
 def showShowList(show_list = None):
     if show_list:
+        print "-------------------------------------------------------------------------"
+        print "*************************************************************************"
         print "Show list:"
-        for showname in show_list.keys():
-            print showname
+        for i, showname in enumerate(show_list.keys()):
+            print "%d. %s" % (i, showname)
+        print "*************************************************************************"
+        print "-------------------------------------------------------------------------"
     else:
         show_list = openShowList()
         if show_list:
@@ -60,17 +68,22 @@ def showShowList(show_list = None):
 def deleteShow():
     show_list = openShowList()
     if show_list:
-        show_name_list = [name for name in show_list.keys()]
-        print "Show List:"
-        for i, name in enumerate(show_name_list):
-            print "%d. %s" %(i, name)
+        show_name_list = show_list.keys()
+
+        print "-------------------------------------------------------------------------"
+        print "*************************************************************************"
+        print "Show list:"
+        for i, showname in enumerate(show_name_list):
+            print "%d. %s" % (i, showname)
+        print "*************************************************************************"
+        print "-------------------------------------------------------------------------"
         number = int(raw_input(
-            "Enter the number before theone you want to delete , enter other keys to abort\n ==>:"))
+            "Enter the number before theone you want to delete , enter other keys to abort\n==>:"))
         try:
             show_list.pop(show_name_list[number])
             saveShowList(show_list)
-            print "\" %s \" deleted" % (show_name_list[number])
-            print "--------------------------------------------"
+            print "\"%s\" deleted" % (show_name_list[number])
+            print "---------------------------------------------------------------------"
         except:
             print "Invalid input, abort."
 
@@ -185,17 +198,17 @@ def switch(flag):
 
 if __name__ == "__main__":
 
-    #showShowList()
-    #while True:
-        #print "What do you want?"
-        #print "1.add new show"
-        #print "2.show show list"
-        #print "3.delete show"
-        #print "Others to abort"
-        #flag = raw_input("==>")
-        #try:
-            #switch(flag)()
-        #except:
-            #print "Abort."
-            #break
-    addNewShow()
+    showShowList()
+    while True:
+        print "What do you want?"
+        print "1.add new show"
+        print "2.show show list"
+        print "3.delete show"
+        print "Others to abort"
+        flag = raw_input("==>")
+        try:
+            switch(flag)()
+        except:
+            print "Abort."
+            break
+    #addNewShow()
