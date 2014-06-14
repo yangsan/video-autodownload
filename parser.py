@@ -6,7 +6,9 @@ import json
 
 show_list_path = "./data/show_list.json"
 
+#methods for show list
 #################################################################
+
 def addNewShow():
     show_list = openShowList()
     if not show_list:
@@ -18,6 +20,9 @@ def addNewShow():
     show_file_name = show_name.replace(" ", "_")
 
     show_list[show_name] = {"url": url, "filename": show_file_name}
+
+    print "Now try to initialize episodes list..."
+    initEpList(show_list[show_name])
 
     saveShowList(show_list)
 
@@ -41,13 +46,15 @@ def saveShowList(show_list):
         print "Can't open show list file."
 
 
-def showShowList(show_list):
+def showShowList(show_list = None):
     if show_list:
         print "Show list:"
         for showname in show_list.keys():
             print showname
     else:
-        print "Show list is empty."
+        show_list = openShowList()
+        if show_list:
+            showShowList(show_list)
 
 
 def deleteShow():
@@ -70,7 +77,59 @@ def deleteShow():
 
 #################################################################
 
+#methods for ep list
+#################################################################
 
+def initEpList(show_info):
+    """
+    Taking in a dict:
+        {
+        "url"       :   "http:...",
+        "filename"  :   "file_name"
+        }
+    """
+    soup = htmlReader(show_info["url"])
+    ep_list = dict()
+
+    while True:
+        download_all = raw_input("Do you want to download all?[y/n/per]")
+        if download_all == "y" or download_all == "n" or download_all == "per":
+            break
+        else:
+            print "Invalid input, please try again."
+
+    for item in soup.find_all("tr", class_='forum_header_border'):
+        ep_info = item.find_all("a", class_="epinfo")
+        if len(ep_info) > 0:
+            ep_name = ep_info[0]["title"]
+            if ep_name not in ep_list :
+
+                if "y" == download_all:
+                        ep_list[ep_name] = False
+
+                elif "n" == download_all:
+                        ep_list[ep_name] = True
+
+                elif "per" == download_all:
+                        while True:
+                            flag = raw_input("Do you want to download \" %s \"?[y/n]" % (ep_name))
+                            if "y" == flag:
+                                ep_list[ep_name] = False
+                                break
+                            elif "n" == flag:
+                                ep_list[ep_name] = True
+                                break
+                            else:
+                                print "Invalid input, please try again."
+
+    saveEpList(show_info["filename"], ep_list)
+
+
+#################################################################
+
+
+#methods for ep downloading
+#################################################################
 def htmlReader(url):
     """
     Taking in a url return a BeautifulSoup soup object.
@@ -86,6 +145,11 @@ def htmlReader(url):
     print "Done reading contents."
 
     return BeautifulSoup(respHTML)
+
+
+def saveEpList(filename, ep_list):
+    with open("./data/" + filename + ".json", "w+") as f:
+        json.dump(ep_list, f)
 
 
 def epDownloader(soup, filename):
@@ -111,17 +175,27 @@ def epDownloader(soup, filename):
     with open(filename, "w+") as f:
         json.dump(eplist, f)
 
+#################################################################
+
+def switch(flag):
+    return {"1": addNewShow,
+            "2": showShowList,
+            "3": deleteShow,}[flag]
+
 
 if __name__ == "__main__":
 
-    ##url = "http://eztv.it/shows/991/seth-meyers-late-night-with/"
-    ##url = "http://eztv.it/shows/983/the-tonight-show-starring-jimmy-fallon/"
-    #url = "http://eztv.it/shows/632/derek/"
-
-    #soup = htmlReader(url)
-
-    #filename = "./json/derek.json"
-
-    #epDownloader(soup, filename)
-    deleteShow()
-
+    #showShowList()
+    #while True:
+        #print "What do you want?"
+        #print "1.add new show"
+        #print "2.show show list"
+        #print "3.delete show"
+        #print "Others to abort"
+        #flag = raw_input("==>")
+        #try:
+            #switch(flag)()
+        #except:
+            #print "Abort."
+            #break
+    addNewShow()
