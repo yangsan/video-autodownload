@@ -66,6 +66,9 @@ def showShowList(show_list=None):
         show_list = openShowList()
         if show_list:
             showShowList(show_list)
+        else:
+            print "Show list is empty."
+            print "-------------------------------------------------------------------------"
 
 
 def deleteShow():
