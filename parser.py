@@ -173,27 +173,27 @@ def saveEpList(filename, ep_list):
 
 def freshAndDownload():
     show_list = openShowList()
-    if not show_list:
+    if show_list:
         for show_info in show_list.values():
             soup = htmlReader(show_info["url"])
             filename = show_info["filename"]
 
             try:
                 with open(filename) as f:
-                    eplist = json.load(f)
+                    ep_list = json.load(f)
 
                 for item in soup.find_all("tr", class_='forum_header_border'):
                     ep_info = item.find_all("a", class_="epinfo")
                     if len(ep_info) > 0:
                         showname = ep_info[0]["title"]
-                        if (showname not in eplist) or (not eplist[showname]):
+                        if (showname not in ep_list) or (not ep_list[showname]):
                             print "Try to download ep: %s" % (showname)
                             magnet = item.find_all("a", class_="magnet")[0]["href"]
                             call(["transmission-gtk", magnet])
-                            eplist[showname] = True
+                            ep_list[showname] = True
 
                 with open(filename, "w+") as f:
-                    json.dump(eplist, f)
+                    json.dump(ep_list, f)
 
             except:
                 print "%s dosen't exit or is empty." % (filename)
@@ -228,17 +228,19 @@ def epDownloader(soup, filename):
 def switch(flag):
     return {"1": addNewShow,
             "2": showShowList,
-            "3": deleteShow}[flag]
+            "3": deleteShow,
+            "4": freshAndDownload}[flag]
 
 
 if __name__ == "__main__":
 
-    showShowList()
+    #freshAndDownload()
     while True:
         print "What do you want?"
         print "1.add new show"
         print "2.show show list"
         print "3.delete show"
+        print "4.fresh and download"
         print "Others to abort"
         flag = raw_input("==>")
         try:
