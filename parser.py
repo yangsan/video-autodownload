@@ -10,9 +10,10 @@ show_list_path = "./data/show_list.json"
 #methods for show list
 #################################################################
 
+
 def addNewShow():
     if not os.path.exists("./data"):
-        call(["mkdir","data"])
+        call(["mkdir", "data"])
 
     show_list = openShowList()
     if not show_list:
@@ -23,7 +24,8 @@ def addNewShow():
     url = raw_input("Enter show url:")
     show_file_name = show_name.replace(" ", "_")
 
-    show_list[show_name] = {"url": url, "filename": show_file_name}
+    show_list[show_name] = {"url": url,
+                            "filename": "./data/" + show_file_name + ".json"}
 
     print "Now try to initialize episodes list..."
     initEpList(show_list[show_name])
@@ -42,6 +44,7 @@ def openShowList():
         print "Show list dosen't exit or is empty."
         return None
 
+
 def saveShowList(show_list):
     try:
         with open(show_list_path, "w+") as f:
@@ -50,7 +53,7 @@ def saveShowList(show_list):
         print "Can't open show list file."
 
 
-def showShowList(show_list = None):
+def showShowList(show_list=None):
     if show_list:
         print "-------------------------------------------------------------------------"
         print "*************************************************************************"
@@ -80,9 +83,11 @@ def deleteShow():
         number = int(raw_input(
             "Enter the number before theone you want to delete , enter other keys to abort\n==>:"))
         try:
-            show_list.pop(show_name_list[number])
+            showname = show_name_list[number]
+            call(["rm", show_list[showname]["filename"]])
+            show_list.pop(showname)
             saveShowList(show_list)
-            print "\"%s\" deleted" % (show_name_list[number])
+            print "\"%s\" deleted" % (showname)
             print "---------------------------------------------------------------------"
         except:
             print "Invalid input, abort."
@@ -92,6 +97,7 @@ def deleteShow():
 
 #methods for ep list
 #################################################################
+
 
 def initEpList(show_info):
     """
@@ -115,7 +121,7 @@ def initEpList(show_info):
         ep_info = item.find_all("a", class_="epinfo")
         if len(ep_info) > 0:
             ep_name = ep_info[0]["title"]
-            if ep_name not in ep_list :
+            if ep_name not in ep_list:
 
                 if "y" == download_all:
                         ep_list[ep_name] = False
@@ -161,8 +167,36 @@ def htmlReader(url):
 
 
 def saveEpList(filename, ep_list):
-    with open("./data/" + filename + ".json", "w+") as f:
+    with open(filename, "w+") as f:
         json.dump(ep_list, f)
+
+
+def freshAndDownload():
+    show_list = openShowList()
+    if not show_list:
+        for show_info in show_list.values():
+            soup = htmlReader(show_info["url"])
+            filename = show_info["filename"]
+
+            try:
+                with open(filename) as f:
+                    eplist = json.load(f)
+
+                for item in soup.find_all("tr", class_='forum_header_border'):
+                    ep_info = item.find_all("a", class_="epinfo")
+                    if len(ep_info) > 0:
+                        showname = ep_info[0]["title"]
+                        if (showname not in eplist) or (not eplist[showname]):
+                            print "Try to download ep: %s" % (showname)
+                            magnet = item.find_all("a", class_="magnet")[0]["href"]
+                            call(["transmission-gtk", magnet])
+                            eplist[showname] = True
+
+                with open(filename, "w+") as f:
+                    json.dump(eplist, f)
+
+            except:
+                print "%s dosen't exit or is empty." % (filename)
 
 
 def epDownloader(soup, filename):
@@ -190,10 +224,11 @@ def epDownloader(soup, filename):
 
 #################################################################
 
+
 def switch(flag):
     return {"1": addNewShow,
             "2": showShowList,
-            "3": deleteShow,}[flag]
+            "3": deleteShow}[flag]
 
 
 if __name__ == "__main__":
