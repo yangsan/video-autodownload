@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from bs4 import BeautifulSoup
 import urllib2
-from subprocess import call
+from subprocess import Popen
 import json
 import os
 
@@ -13,7 +13,7 @@ show_list_path = "./data/show_list.json"
 
 def addNewShow():
     if not os.path.exists("./data"):
-        call(["mkdir", "data"])
+        Popen(["mkdir", "data"])
 
     show_list = openShowList()
     if not show_list:
@@ -87,7 +87,7 @@ def deleteShow():
             "Enter the number before the one you want to delete , enter other keys to abort\n==>:"))
         try:
             showname = show_name_list[number]
-            call(["rm", show_list[showname]["filename"]])
+            Popen(["rm", show_list[showname]["filename"]])
             show_list.pop(showname)
             saveShowList(show_list)
             print "\"%s\" deleted" % (showname)
@@ -239,7 +239,8 @@ def freshAndDownload():
                         if (showname not in ep_list) or (not ep_list[showname]):
                             print "Try to download ep: %s" % (showname)
                             magnet = item.find_all("a", class_="magnet")[0]["href"]
-                            call(["transmission-gtk", magnet])
+                            with open("log.out", "a+") as f:
+                                Popen(["transmission-gtk", magnet], stderr = f)
                             ep_list[showname] = True
 
                 with open(filename, "w+") as f:
