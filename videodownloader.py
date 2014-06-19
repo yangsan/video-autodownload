@@ -40,9 +40,13 @@ def addNewShow():
     show_name = raw_input("Enter the show name:")
     url = raw_input("Enter show url:")
     show_table_name = show_name.replace(" ", "_")
-    db.addNewRowInShowTable(show_name, url, show_table_name)
-    db.createEpListTable(show_table_name)
-    intializeEpList(show_table_name, url)
+    if not db.addNewRowInShowTable(show_name, url, show_table_name):
+        print "Show info already exists."
+    else:
+        if not db.createEpListTable(show_table_name):
+            print "Episodes list already exists."
+        else:
+            intializeEpList(show_table_name, url)
 
 
 def deleteShow():
@@ -113,11 +117,6 @@ def intializeEpList(show_table_name, url):
                     break
                 else:
                     print "Invalid input, please try again."
-
-
-
-
-
 
 
 #swich func

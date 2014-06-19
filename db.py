@@ -43,17 +43,16 @@ def addNewRowInShowTable(show_name, url, show_table_name):
     """
     conn, cursor = _connectDatabase()
 
-    try:
-        cursor.execute("""
-                        insert into showlist
-                        (showname, url, tablename)
-                        values
-                        (?, ?, ?)
-                        """,
-                        (show_name, url, show_table_name))
-
-    except sqlite3.OperationalError:
+    tb_exits = "select name from sqlite_master where type='table' and name = 'showlist'"
+    if not cursor.execute(tb_exits).fetchone():
         createShowListTable(cursor)
+
+    row_exits = cursor.execute("""
+                   select * from showlist
+                   where showname = ?
+                   """, (show_name,)).fetchone()
+
+    if not row_exits:
         cursor.execute("""
                         insert into showlist
                         (showname, url, tablename)
@@ -61,8 +60,12 @@ def addNewRowInShowTable(show_name, url, show_table_name):
                         (?, ?, ?)
                         """,
                         (show_name, url, show_table_name))
+        _closeDatabase(conn, cursor)
+        return 1
+    else:
+        _closeDatabase(conn, cursor)
+        return 0
 
-    _closeDatabase(conn, cursor)
 
 
 def createShowListTable(cursor):
@@ -89,15 +92,21 @@ def getFromShowList(something, show_name):
 
 def createEpListTable(show_table_name):
     conn, cursor = _connectDatabase()
-    cursor.execute("""
-                   create table %s
-                   (
-                   epname text,
-                   magnet text,
-                   status int
-                   )
-                   """ % (show_table_name))
-    _closeDatabase(conn, cursor)
+    tb_exits = "select name from sqlite_master where type='table' and name = \'%s\'" % (show_table_name)
+    if not cursor.execute(tb_exits).fetchone():
+        cursor.execute("""
+                    create table %s
+                    (
+                    epname text,
+                    magnet text,
+                    status int
+                    )
+                    """ % (show_table_name))
+        _closeDatabase(conn, cursor)
+        return 1
+    else:
+        _closeDatabase(conn, cursor)
+        return 0
 
 
 def addNewEp(show_table_name, ep_name, magnet, status):
@@ -115,9 +124,11 @@ def deleteEpList(show_table_name):
     conn, cursor = _connectDatabase()
     print show_table_name
 
-    cursor.execute("""
-                   drop table %s
-                   """ % (show_table_name))
+    tb_exits = "select name from sqlite_master where type='table' and name = \'%s\'" % (show_table_name)
+    if cursor.execute(tb_exits).fetchone():
+        cursor.execute("""
+                    drop table %s
+                    """ % (show_table_name))
 
     _closeDatabase(conn, cursor)
 
@@ -131,6 +142,17 @@ def deleteShowListRow(show_id):
                    """, (show_id,))
 
     _closeDatabase(conn, cursor)
+
+
+def ifIn(name, table_name):
+    conn, cursor = _connectDatabase()
+
+    _closeDatabase(conn, cursor)
+    return True
+
+
+def tableExist():
+    pass
 
 
 def deleteRow():
