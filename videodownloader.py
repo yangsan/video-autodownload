@@ -95,7 +95,28 @@ def intializeEpList(show_table_name, url):
             print "Invalid input, please try again."
 
     for item in soup.find_all("a", title=u"磁力链"):
-        print item.parent.previous_sibling.previous_sibling.string
+        ep_name =  item.parent.previous_sibling.previous_sibling.string
+        magnet = item["href"]
+        if "y" == download_all:
+            db.addNewEp(show_table_name, ep_name, magnet, 0)
+        elif "n" == download_all:
+            db.addNewEp(show_table_name, ep_name, magnet, 1)
+        else:
+            while True:
+                flag = raw_input("Do you want to download \" %s \"?[y/n]"
+                                 % (show_table_name.replace("_", " ")))
+                if "y" == flag:
+                    db.addNewEp(show_table_name, ep_name, magnet, 0)
+                    break
+                elif "n" == flag:
+                    db.addNewEp(show_table_name, ep_name, magnet, 1)
+                    break
+                else:
+                    print "Invalid input, please try again."
+
+
+
+
 
 
 

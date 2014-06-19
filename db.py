@@ -100,6 +100,17 @@ def createEpListTable(show_table_name):
     _closeDatabase(conn, cursor)
 
 
+def addNewEp(show_table_name, ep_name, magnet, status):
+    conn, cursor = _connectDatabase()
+    cursor.execute("""
+                   insert into %s
+                   (epname, magnet, status)
+                   values
+                   (?, ?, ?)
+                   """ % (show_table_name),
+                   (ep_name, magnet, status))
+    _closeDatabase(conn, cursor)
+
 def deleteEpList(show_table_name):
     conn, cursor = _connectDatabase()
     print show_table_name
