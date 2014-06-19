@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from bs4 import BeautifulSoup
 import urllib2
+from subprocess import Popen
 import db
 
 
@@ -137,6 +138,21 @@ def freshEpList():
                 print "Episode: %s added" % ep_name
 
 
+#download ep list
+#########################################################################
+def downloadEp():
+    print "Downloading..."
+    show_list = db.getShowList()
+    for show in show_list:
+        show_table_name = show[1]
+        undone_list = db.getUndoneEpList(show_table_name)
+        if undone_list:
+            for ep in undone_list:
+                print "Try: %s" % (ep[0])
+                with open("log.out", "a+") as f:
+                    Popen(["transmission-gtk", ep[1]], stderr = f)
+
+
 
 #swich func
 #########################################################################
@@ -145,7 +161,8 @@ def switch(flag):
         "1": showShowList,
         "2": addNewShow,
         "3": deleteShow,
-        "4": freshEpList
+        "4": freshEpList,
+        "5": downloadEp
     }[flag]
 
 
@@ -167,5 +184,6 @@ if __name__ == "__main__":
         print "2.Add new show"
         print "3.Delete show"
         print "4.Fresh episodes list"
+        print "5.Download"
         flag = raw_input("==>")
         switch(flag)()

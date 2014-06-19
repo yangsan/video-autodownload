@@ -162,6 +162,19 @@ def ifIn(name, table_name):
         return False
 
 
+def getUndoneEpList(table_name):
+    conn, cursor = _connectDatabase()
+    cursor.execute("""
+                   select * from %s
+                   where status = 0
+                   """ % (table_name))
+    undone_list = cursor.fetchall()
+
+    _closeDatabase(conn, cursor)
+    return undone_list
+
+
+
 def tableExist(table_name):
     conn, cursor = _connectDatabase()
     tb_exits = "select name from sqlite_master where type='table' and name = \'%s\'" % (table_name)
