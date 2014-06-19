@@ -109,14 +109,20 @@ def createEpListTable(show_table_name):
 
 def addNewEp(show_table_name, ep_name, magnet, status):
     conn, cursor = _connectDatabase()
-    cursor.execute("""
-                   insert into %s
-                   (epname, magnet, status)
-                   values
-                   (?, ?, ?)
-                   """ % (show_table_name),
-                   (ep_name, magnet, status))
-    _closeDatabase(conn, cursor)
+    if not ifIn(ep_name, show_table_name):
+        cursor.execute("""
+                    insert into %s
+                    (epname, magnet, status)
+                    values
+                    (?, ?, ?)
+                    """ % (show_table_name),
+                    (ep_name, magnet, status))
+        _closeDatabase(conn, cursor)
+        return 1
+    else:
+        _closeDatabase(conn, cursor)
+        return 0
+
 
 def deleteEpList(show_table_name):
     conn, cursor = _connectDatabase()
@@ -144,8 +150,16 @@ def deleteShowListRow(show_id):
 def ifIn(name, table_name):
     conn, cursor = _connectDatabase()
 
-    _closeDatabase(conn, cursor)
-    return True
+    cursor.execute("""
+                   select * from %s
+                   where epname = ?
+                   """ % (table_name), (name,))
+    if cursor.fetchone():
+        _closeDatabase(conn, cursor)
+        return True
+    else:
+        _closeDatabase(conn, cursor)
+        return False
 
 
 def tableExist(table_name):

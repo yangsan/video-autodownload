@@ -119,13 +119,33 @@ def intializeEpList(show_table_name, url):
                     print "Invalid input, please try again."
 
 
+#fresh episodes list
+#########################################################################
+def freshEpList():
+    print "Freshing episodes list:"
+    show_list = db.getShowList()
+    for show in show_list:
+        show_name = show[1]
+        url = show[2]
+        show_table_name = show[3]
+        print "Try: %s" % (show_name)
+        soup = htmlReader(url)
+        for item in soup.find_all("a", title=u"磁力链"):
+            ep_name = item.parent.previous_sibling.previous_sibling.string
+            magnet = item["href"]
+            if db.addNewEp(show_table_name, ep_name, magnet, 0):
+                print "Episode: %s added" % ep_name
+
+
+
 #swich func
 #########################################################################
 def switch(flag):
     return {
         "1": showShowList,
         "2": addNewShow,
-        "3": deleteShow
+        "3": deleteShow,
+        "4": freshEpList
     }[flag]
 
 
@@ -146,14 +166,6 @@ if __name__ == "__main__":
         print "1.Show show list"
         print "2.Add new show"
         print "3.Delete show"
+        print "4.Fresh episodes list"
         flag = raw_input("==>")
         switch(flag)()
-
-    #url = "http://www.ttmeiju.com/meiju/The.Tonight.Show.Starring.Jimmy.Fallon.html"
-
-    #soup = htmlReader(url)
-
-    #for item in soup.fin_all("a", title=u"磁力链"):
-        ##print type(item)
-        #print item.parent.previous_sibling.previous_sibling
-        #break
