@@ -43,8 +43,7 @@ def addNewRowInShowTable(show_name, url, show_table_name):
     """
     conn, cursor = _connectDatabase()
 
-    tb_exits = "select name from sqlite_master where type='table' and name = 'showlist'"
-    if not cursor.execute(tb_exits).fetchone():
+    if not tableExist("showlist"):
         createShowListTable(cursor)
 
     row_exits = cursor.execute("""
@@ -92,8 +91,7 @@ def getFromShowList(something, show_name):
 
 def createEpListTable(show_table_name):
     conn, cursor = _connectDatabase()
-    tb_exits = "select name from sqlite_master where type='table' and name = \'%s\'" % (show_table_name)
-    if not cursor.execute(tb_exits).fetchone():
+    if not tableExist(show_table_name):
         cursor.execute("""
                     create table %s
                     (
@@ -124,8 +122,7 @@ def deleteEpList(show_table_name):
     conn, cursor = _connectDatabase()
     print show_table_name
 
-    tb_exits = "select name from sqlite_master where type='table' and name = \'%s\'" % (show_table_name)
-    if cursor.execute(tb_exits).fetchone():
+    if tableExist(show_table_name):
         cursor.execute("""
                     drop table %s
                     """ % (show_table_name))
@@ -151,8 +148,18 @@ def ifIn(name, table_name):
     return True
 
 
-def tableExist():
-    pass
+def tableExist(table_name):
+    conn, cursor = _connectDatabase()
+    tb_exits = "select name from sqlite_master where type='table' and name = \'%s\'" % (table_name)
+
+    if cursor.execute(tb_exits).fetchone():
+        _closeDatabase(conn, cursor)
+        return True
+    else:
+        _closeDatabase(conn, cursor)
+        return False
+
+
 
 
 def deleteRow():
