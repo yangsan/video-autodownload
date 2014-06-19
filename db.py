@@ -19,6 +19,7 @@ def _closeDatabase(conn, cursor):
     cursor.close()
     conn.close()
 
+
 def getShowList():
     """
     get show list from table showlist
@@ -27,7 +28,7 @@ def getShowList():
 
     try:
         cursor.execute("select rowid, * from showlist")
-    except sqlite3.OperationalError, e:
+    except sqlite3.OperationalError:
         createShowListTable(cursor)
         cursor.execute("select rowid, * from showlist")
 
@@ -51,7 +52,7 @@ def addNewRowInShowTable(show_name, url, show_table_name):
                         """,
                         (show_name, url, show_table_name))
 
-    except sqlite3.OperationalError, e:
+    except sqlite3.OperationalError:
         createShowListTable(cursor)
         cursor.execute("""
                         insert into showlist
@@ -64,7 +65,6 @@ def addNewRowInShowTable(show_name, url, show_table_name):
     _closeDatabase(conn, cursor)
 
 
-
 def createShowListTable(cursor):
     cursor.execute("""
                 create table showlist
@@ -75,17 +75,45 @@ def createShowListTable(cursor):
                 )
                 """)
 
-def createEpListTable():
-    pass
 
-def deleteTable():
-    pass
+def getFromShowList(something, show_name):
+    conn, cursor = _connectDatabase()
+    something = cursor.execute("""
+                   select %s from showlist
+                   where showname = ?
+                   """ % (something), (show_name))
+
+    _closeDatabase(conn, cursor)
+    return something
+
+
+def createEpListTable(show_table_name):
+    conn, cursor = _connectDatabase()
+    cursor.execute("""
+                   create table %s
+                   (
+                   epname text,
+                   magnet text,
+                   status int
+                   )
+                   """ % (show_table_name))
+    _closeDatabase(conn, cursor)
+
+
+def deleteEpList(show_table_name):
+    conn, cursor = _connectDatabase()
+    print show_table_name
+
+    cursor.execute("""
+                   drop table %s
+                   """ % (show_table_name))
+
+    _closeDatabase(conn, cursor)
+
 
 def deleteShowListRow(show_id):
     conn, cursor = _connectDatabase()
 
-
-    print type(show_id)
     cursor.execute("""
                    delete from showlist
                    where rowid = ?
@@ -94,9 +122,9 @@ def deleteShowListRow(show_id):
     _closeDatabase(conn, cursor)
 
 
-
 def deleteRow():
     pass
+
 
 def getTableContent():
     pass
@@ -152,5 +180,3 @@ def getTableContent():
 #print cursor.fetchall()
 
 #cursor.execute("drop table person")
-
-

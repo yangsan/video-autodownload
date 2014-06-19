@@ -19,12 +19,12 @@ def htmlReader(url):
 
 #show list maintainer
 #######################################################################e#
-def showShowList(show_list = None):
+def showShowList(show_list=None):
     if show_list:
         printBeginofBlock()
         print "The show list:"
         for number, show in enumerate(show_list):
-            print "%d) %s showid: %d" % (number, show[1], show[0])
+            print "%d) %s" % (number, show[1])
         printEndofBlock()
         return 1
     else:
@@ -35,11 +35,14 @@ def showShowList(show_list = None):
         else:
             showShowList(show_list)
 
+
 def addNewShow():
     show_name = raw_input("Enter the show name:")
     url = raw_input("Enter show url:")
     show_table_name = show_name.replace(" ", "_")
     db.addNewRowInShowTable(show_name, url, show_table_name)
+    db.createEpListTable(show_table_name)
+    intializeEpList(show_table_name, url)
 
 
 def deleteShow():
@@ -63,7 +66,8 @@ def deleteShow():
                 show_id_input = int(show_id_input)
                 show_id = show_map[show_id_input][0]
                 db.deleteShowListRow(show_id)
-                print "%s deleted." % show_map[show_id_input][1]
+                db.deleteEpList(show_map[show_id_input][3])
+                print "Show: %s deleted." % show_map[show_id_input][1]
                 return 0
             except ValueError, e:
                 print "Error: ", e
@@ -78,6 +82,22 @@ def deleteShow():
     return 0
 
 
+#episodes list maintainer
+#########################################################################
+def intializeEpList(show_table_name, url):
+    soup = htmlReader(url)
+
+    while True:
+        download_all = raw_input("Do you want to download all?[y/n/per]")
+        if download_all == "y"  or download_all == "n" or download_all == "per":
+            break
+        else:
+            print "Invalid input, please try again."
+
+    for item in soup.find_all("a", title=u"磁力链"):
+        print item.parent.previous_sibling.previous_sibling.string
+
+
 
 #swich func
 #########################################################################
@@ -88,9 +108,11 @@ def switch(flag):
         "3": deleteShow
     }[flag]
 
+
 def printBeginofBlock():
     print "_" * 60
     print "*" * 60
+
 
 def printEndofBlock():
     print "*" * 60
@@ -111,7 +133,7 @@ if __name__ == "__main__":
 
     #soup = htmlReader(url)
 
-    #for item in soup.find_all("a", title=u"磁力链"):
+    #for item in soup.fin_all("a", title=u"磁力链"):
         ##print type(item)
         #print item.parent.previous_sibling.previous_sibling
         #break
