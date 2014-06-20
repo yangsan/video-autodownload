@@ -66,7 +66,6 @@ def addNewRowInShowTable(show_name, url, show_table_name):
         return 0
 
 
-
 def createShowListTable(cursor):
     cursor.execute("""
                 create table showlist
@@ -115,8 +114,7 @@ def addNewEp(show_table_name, ep_name, magnet, status):
                     (epname, magnet, status)
                     values
                     (?, ?, ?)
-                    """ % (show_table_name),
-                    (ep_name, magnet, status))
+                    """ % (show_table_name), (ep_name, magnet, status))
         _closeDatabase(conn, cursor)
         return 1
     else:
@@ -174,6 +172,16 @@ def getUndoneEpList(table_name):
     return undone_list
 
 
+def changeStatus(table_name, ep_name):
+    conn, cursor = _connectDatabase()
+    cursor.execute("""
+                   update %s
+                   set status=1
+                   where epname = ?
+                   """ % (table_name), (ep_name,))
+
+    _closeDatabase(conn, cursor)
+
 
 def tableExist(table_name):
     conn, cursor = _connectDatabase()
@@ -185,65 +193,3 @@ def tableExist(table_name):
     else:
         _closeDatabase(conn, cursor)
         return False
-
-
-
-
-def deleteRow():
-    pass
-
-
-def getTableContent():
-    pass
-
-
-#try:
-    #cursor.execute("select * from showlist")
-#except StandardError, e:
-    #print e, "\n try to create one."
-    #cursor.execute("""
-                   #create table showlist
-                   #(
-                   #showname text,
-                   #url text,
-                   #tablename text
-                   #)
-                   #""")
-    #cursor.execute("select * from showlist")
-
-#cursor.execute("""
-               #create table person
-               #(
-               #name varchar(20),
-               #city varchar(20)
-               #)
-               #""")
-
-#cursor.execute("""
-               #insert into person
-               #(name, city)
-                #values ('kevin', 'Lanzhou')""")
-
-#cursor.execute("""
-               #insert into person
-               #(name, city)
-                #values ('mark', 'print')
-               #""")
-
-
-#cursor.execute("select * from showlist")
-#print cursor.fetchone()
-#print type(cursor.fetchone())
-#for row in cursor.execute("select * from user"):
-    #print type(row)
-    #print row
-
-#for item in cursor.fetchone():
-    #print type(item)
-    #print item
-
-#for row in cursor.execute("select rowid, * from person"):
-    #print row
-#print cursor.fetchall()
-
-#cursor.execute("drop table person")

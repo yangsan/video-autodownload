@@ -94,13 +94,13 @@ def intializeEpList(show_table_name, url):
 
     while True:
         download_all = raw_input("Do you want to download all?[y/n/per]")
-        if download_all == "y"  or download_all == "n" or download_all == "per":
+        if download_all == "y" or download_all == "n" or download_all == "per":
             break
         else:
             print "Invalid input, please try again."
 
     for item in soup.find_all("a", title=u"磁力链"):
-        ep_name =  item.parent.previous_sibling.previous_sibling.string
+        ep_name = item.parent.previous_sibling.previous_sibling.string
         magnet = item["href"]
         if "y" == download_all:
             db.addNewEp(show_table_name, ep_name, magnet, 0)
@@ -143,6 +143,7 @@ def freshEpList():
 def downloadEp():
     print "Downloading..."
     show_list = db.getShowList()
+    flag = 0
     for show in show_list:
         show_table_name = show[1]
         undone_list = db.getUndoneEpList(show_table_name)
@@ -150,8 +151,11 @@ def downloadEp():
             for ep in undone_list:
                 print "Try: %s" % (ep[0])
                 with open("log.out", "a+") as f:
-                    Popen(["transmission-gtk", ep[1]], stderr = f)
-
+                    Popen(["transmission-gtk", ep[1]], stderr=f)
+                    flag = 1
+                db.changeStatus(show_table_name, ep[0])
+    if not flag:
+        print "Nothing downloaded."
 
 
 #swich func
