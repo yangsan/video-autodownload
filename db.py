@@ -67,6 +67,11 @@ def addNewRowInShowTable(show_name, url, show_table_name):
 
 
 def createShowListTable(cursor):
+    """
+    status code
+    0: download whatever
+    1: will see
+    """
     cursor.execute("""
                 create table showlist
                 (
@@ -89,6 +94,12 @@ def getFromShowList(something, show_name):
 
 
 def createEpListTable(show_table_name):
+    """
+    status code
+    0: not downloaded yet
+    1: downloaded
+    2: pending
+    """
     conn, cursor = _connectDatabase()
     if not tableExist(show_table_name):
         cursor.execute("""
@@ -124,7 +135,6 @@ def addNewEp(show_table_name, ep_name, magnet, status):
 
 def deleteEpList(show_table_name):
     conn, cursor = _connectDatabase()
-    print show_table_name
 
     if tableExist(show_table_name):
         cursor.execute("""

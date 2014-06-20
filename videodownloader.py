@@ -47,7 +47,7 @@ def addNewShow():
         if not db.createEpListTable(show_table_name):
             print "Episodes list already exists."
         else:
-            intializeEpList(show_table_name, url)
+            initializeEpList(show_table_name, url)
 
 
 def deleteShow():
@@ -89,7 +89,7 @@ def deleteShow():
 
 #episodes list maintainer
 #########################################################################
-def intializeEpList(show_table_name, url):
+def initializeEpList(show_table_name, url):
     soup = htmlReader(url)
 
     while True:
@@ -120,6 +120,40 @@ def intializeEpList(show_table_name, url):
                 else:
                     print "Invalid input, please try again."
 
+
+def showEpList():
+    show_list = db.getShowList()
+    show_map = {}
+    if show_list:
+        print "Which one do you want to see? Enter n to abort."
+        for number, show in enumerate(show_list):
+            print "%d) %s" % (number, show[1])
+            show_map[number] = show
+
+        while True:
+            show_id_input = raw_input("==>")
+            if show_id_input == "n":
+                print "Abort delete."
+                return 1
+            try:
+                show_id_input = int(show_id_input)
+                show_table_name = show_map[show_id_input][3]
+                showEpListTable(show_table_name)
+                return 0
+            except ValueError, e:
+                print "Error: ", e
+                print "Please try again."
+            except KeyError, e:
+                print "Error: input number out of range."
+                print "Please try again."
+
+    else:
+        print "The show list is empyt, nothing to show."
+
+    return 0
+
+def showEpListTable(table_name):
+    get
 
 #fresh episodes list
 #########################################################################
