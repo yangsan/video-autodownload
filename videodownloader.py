@@ -108,8 +108,9 @@ def intializeEpList(show_table_name, url):
             db.addNewEp(show_table_name, ep_name, magnet, 1)
         else:
             while True:
+                #print ep_name
                 flag = raw_input("Do you want to download \" %s \"?[y/n]"
-                                 % (show_table_name.replace("_", " ")))
+                                 % (ep_name.encode("utf8")))
                 if "y" == flag:
                     db.addNewEp(show_table_name, ep_name, magnet, 0)
                     break
@@ -155,7 +156,7 @@ def downloadEp():
                     flag = 1
                 db.changeStatus(show_table_name, ep[0])
     if not flag:
-        print "Nothing downloaded."
+        print "Clear, nothing downloaded."
 
 
 #swich func
