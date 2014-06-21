@@ -133,6 +133,18 @@ def addNewEp(show_table_name, ep_name, magnet, status):
         return 0
 
 
+def getEpList(table_name):
+    conn, cursor = _connectDatabase()
+
+    cursor.execute("""
+                   select * from %s
+                   """ % table_name)
+
+    table_list = cursor.fetchall()
+    _closeDatabase(conn, cursor)
+    return table_list
+
+
 def deleteEpList(show_table_name):
     conn, cursor = _connectDatabase()
 

@@ -152,8 +152,13 @@ def showEpList():
 
     return 0
 
+
 def showEpListTable(table_name):
-    get
+    ep_list = db.getEpList(table_name)
+    print "The episodes list:"
+    for number, ep in enumerate(ep_list):
+        print "%d) %s" % (number, ep[0].encode("utf8"))
+
 
 #fresh episodes list
 #########################################################################
@@ -201,7 +206,8 @@ def switch(flag):
         "2": addNewShow,
         "3": deleteShow,
         "4": freshEpList,
-        "5": downloadEp
+        "5": downloadEp,
+        "6": showEpList
     }[flag]
 
 
@@ -224,5 +230,6 @@ if __name__ == "__main__":
         print "3.Delete show"
         print "4.Fresh episodes list"
         print "5.Download"
+        print "6.Show episodes list"
         flag = raw_input("==>")
         switch(flag)()
