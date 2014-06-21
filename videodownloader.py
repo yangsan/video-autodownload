@@ -40,8 +40,21 @@ def showShowList(show_list=None):
 def addNewShow():
     show_name = raw_input("Enter the show name:")
     url = raw_input("Enter show url:")
+
+    print "Do you want to auto-download this show?[y/n]"
+    while True:
+        status = raw_input("==>")
+        if status == "n":
+            status_code = 1
+            break
+        elif status == "y":
+            status_code = 0
+            break
+        else:
+            print "Invalid input, please try again."
+
     show_table_name = show_name.replace(" ", "_")
-    if not db.addNewRowInShowTable(show_name, url, show_table_name):
+    if not db.addNewRowInShowTable(show_name, url, show_table_name, status_code):
         print "Show info already exists."
     else:
         if not db.createEpListTable(show_table_name):
@@ -154,10 +167,13 @@ def showEpList():
 
 
 def showEpListTable(table_name):
+    status = {0: "not downloaded yet",
+              1: "done",
+              2: "pending"}
     ep_list = db.getEpList(table_name)
     print "The episodes list:"
     for number, ep in enumerate(ep_list):
-        print "%d) %s" % (number, ep[0].encode("utf8"))
+        print "%d) status:%s  %s" % (number, status[ep[2]], ep[0].encode("utf8"))
 
 
 #fresh episodes list
@@ -169,13 +185,45 @@ def freshEpList():
         show_name = show[1]
         url = show[2]
         show_table_name = show[3]
+        if show[4]:
+            status = 2
+        else:
+            status = 0
         print "Try: %s" % (show_name)
         soup = htmlReader(url)
         for item in soup.find_all("a", title=u"磁力链"):
             ep_name = item.parent.previous_sibling.previous_sibling.string
             magnet = item["href"]
-            if db.addNewEp(show_table_name, ep_name, magnet, 0):
+            if db.addNewEp(show_table_name, ep_name, magnet, status):
                 print "Episode: %s added" % ep_name
+
+
+#comfirm pending shows
+#########################################################################
+def confirmPendingEps():
+    show_list = db.getShowList()
+    flag = 0
+    for show in show_list:
+        show_table_name = show[3]
+        pending_list = db.getSpecificEpList(show_table_name, 2)
+        if pending_list:
+            for ep in pending_list:
+                flag = 1
+                ep_name = ep[0]
+                print "Do you want to download: %s?[y/n]" % (ep_name)
+
+                while True:
+                    user_input = raw_input("==>")
+                    if user_input == "n":
+                        db.changeStatus(show_table_name, ep_name, 1)
+                        break
+                    elif user_input == "y":
+                        db.changeStatus(show_table_name, ep_name, 0)
+                        break
+                    else:
+                        print "Invalid input, please try again."
+    if not flag:
+        print "Clear nothing pending."
 
 
 #download ep list
@@ -185,15 +233,15 @@ def downloadEp():
     show_list = db.getShowList()
     flag = 0
     for show in show_list:
-        show_table_name = show[1]
-        undone_list = db.getUndoneEpList(show_table_name)
+        show_table_name = show[3]
+        undone_list = db.getSpecificEpList(show_table_name, 0)
         if undone_list:
             for ep in undone_list:
                 print "Try: %s" % (ep[0])
                 with open("log.out", "a+") as f:
                     Popen(["transmission-gtk", ep[1]], stderr=f)
                     flag = 1
-                db.changeStatus(show_table_name, ep[0])
+                db.changeStatus(show_table_name, ep[0], 1)
     if not flag:
         print "Clear, nothing downloaded."
 
@@ -207,7 +255,8 @@ def switch(flag):
         "3": deleteShow,
         "4": freshEpList,
         "5": downloadEp,
-        "6": showEpList
+        "6": showEpList,
+        "7": confirmPendingEps
     }[flag]
 
 
@@ -231,5 +280,6 @@ if __name__ == "__main__":
         print "4.Fresh episodes list"
         print "5.Download"
         print "6.Show episodes list"
+        print "7.Confirm pending episodes"
         flag = raw_input("==>")
         switch(flag)()

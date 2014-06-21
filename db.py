@@ -37,7 +37,7 @@ def getShowList():
     return show_list
 
 
-def addNewRowInShowTable(show_name, url, show_table_name):
+def addNewRowInShowTable(show_name, url, show_table_name, status_code):
     """
     add a new show into the show table
     """
@@ -54,11 +54,11 @@ def addNewRowInShowTable(show_name, url, show_table_name):
     if not row_exits:
         cursor.execute("""
                         insert into showlist
-                        (showname, url, tablename)
+                        (showname, url, tablename, status)
                         values
-                        (?, ?, ?)
+                        (?, ?, ?, ?)
                         """,
-                        (show_name, url, show_table_name))
+                        (show_name, url, show_table_name, status_code))
         _closeDatabase(conn, cursor)
         return 1
     else:
@@ -77,7 +77,8 @@ def createShowListTable(cursor):
                 (
                 showname text,
                 url text,
-                tablename text
+                tablename text,
+                status int
                 )
                 """)
 
@@ -182,25 +183,26 @@ def ifIn(name, table_name):
         return False
 
 
-def getUndoneEpList(table_name):
+def getSpecificEpList(table_name, status):
     conn, cursor = _connectDatabase()
+
     cursor.execute("""
                    select * from %s
-                   where status = 0
-                   """ % (table_name))
-    undone_list = cursor.fetchall()
+                   where status = ?
+                   """ % (table_name), (status,))
 
+    specific_list = cursor.fetchall()
     _closeDatabase(conn, cursor)
-    return undone_list
+    return specific_list
 
 
-def changeStatus(table_name, ep_name):
+def changeStatus(table_name, ep_name, status):
     conn, cursor = _connectDatabase()
     cursor.execute("""
                    update %s
-                   set status=1
+                   set status= ?
                    where epname = ?
-                   """ % (table_name), (ep_name,))
+                   """ % (table_name), (status, ep_name))
 
     _closeDatabase(conn, cursor)
 
